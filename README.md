@@ -12,22 +12,22 @@ sends the current wind speed to the Azure IoT Hub.  It also listens for commands
  
 # azure-iot-hub
 This application listens for messages send to the Azure IoT Hub, and publishes them to the Spring Cloud Data Flow (SCDF) pipeline.  This application
-is a SCDF source app.
+is an SCDF source app.
 
 # azure-iot-output
-This application is a SCDF sink which listens on the pipeline for messages, and calculates the average wind speed over the last 30 seconds or so.  If 
+This application is an SCDF sink which listens on the pipeline for messages, calculates the average wind speed over the last 30 seconds or so, and stores the results in Redis.  If 
 the average wind speed is less than 10 mph, it sends a command to the virtual device to set the background color to yellow.  Likewise, an average between
 10 and 30 is green, and above 30 is red.  Commands are sent to the device only when the color needs to be changed.
 
 # Azure IoT Hub setup
 You'll need an Azure account, and create an IoT Hub to use, follow the directions [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-java-java-getstarted) up to and including the first sample application to create a device identity.  As you go along, be sure to capture:
 * Hostname
-* iothubowner Connection String
-* iothubowner Primary Key
-* Messaging Event Hub Compatible Name
-* Messaging Event Hub Compatible Endpoint
-* Sample application output Device ID
-* Sample application output Device Key
+* iothubowner - Connection String
+* iothubowner - Primary Key
+* Messaging - Event Hub Compatible Name
+* Messaging - Event Hub Compatible Endpoint
+* Sample application output - Device ID
+* Sample application output - Device Key
 
 # Spring Cloud Data Flow setup
 Spring Cloud Data Flow [SCDF](https://cloud.spring.io/spring-cloud-dataflow/) is a great tool for creating data microservices which can be deployed to Pivotal
@@ -50,7 +50,7 @@ app info --id sink:azure-iot-output
 ```
 
 Now you are ready to create and deploy the stream to use these apps.  Just substitute the Azure IoT Hub values from when you set up your IoT hub
-on Azure, and select a unique STREAM_NAME.
+on Azure, and substitute a unique value for STREAM_NAME.
 
 ```
 stream create --name STREAM_NAME --definition "azure-iot-hub --hubendpoint=HUB_ENDPOINT_URL --hubkey=HUB_KEY--hubname=HUB_NAME | azure-iot-output --hostname=HOST_NAME --hubkey=HUB_KEY"
@@ -74,6 +74,11 @@ applications:
     DEVICE_ID: DEVICE_ID
     SHARED_ACCESS_KEY: SHARED_ACCESS_KEY
 ```
+
+Once the app is deployed, note the URL from the output, and load the app into your browser.  Click the "Start" button to start sending data to the Azure IoT Hub, and "Stop" to pause the data.  You can use the "+" and "-" buttons to adjust the wind speed, then wait around 30 seconds for the background color to change (at 10 and 30 mph).
+
+Use "cf apps" to get the name of the apps deployed to PCF by SCDF, and use "cf logs" to see the messages processed by each component application.
+
 
 
 
