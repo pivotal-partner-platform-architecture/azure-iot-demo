@@ -1,0 +1,154 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<title>Azure IoT Device</title>
+
+<script type="text/javascript" src="http://mbostock.github.com/d3/d3.min.js"></script>
+<script type="text/javascript" src="dial.charts.js"></script>
+<script type="text/javascript">
+
+function doaction(action)
+{
+	var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", action, false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+}
+
+function status()
+{
+	var xhttp = new XMLHttpRequest();
+    xhttp.open("POST", "/status", false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+    // returns status object - String status, double average, double current
+	var obj = JSON.parse(xhttp.responseText);
+    document.getElementById("wind").innerHTML = 'Current Wind Speed is ' + obj.current + ' mph.';
+    var color = obj.status;
+    var mappedColor = "white";
+    
+    if (color == "yellow")
+    {
+    	mappedColor = "yellow"	
+    }
+    else if (color == "green")
+    {
+        mappedColor = "#009F01";
+    }
+    else if (color == "red")
+    {
+    	mappedColor = "red"
+    }
+
+    document.getElementById("mybody").style.backgroundColor = mappedColor;
+    
+    return obj;
+}
+
+var myInterval = setInterval(function() {transition() }, 5000);
+
+function myStopFunction()
+{
+	clearInterval(myInterval)
+}
+
+</script>
+
+<style type="text/css">
+
+#dial-0 .needle path {
+	fill: #b21f24;
+}
+
+circle.label {
+	fill: white;
+}
+
+line.label {
+	stroke: white;
+	stroke-width: 1px;
+}
+
+text.label {
+	font-family: Arial;
+	font-size: 12px;
+	fill: white;
+}
+
+#dial-0 text.label {
+	font-size: 16px;
+}
+</style>
+
+</head>
+
+<body id="mybody" style="background-color: #FFFFFF">
+
+	<button id="start" onclick="doaction('/start');">Start</button>
+	<button id="plus" onclick="doaction('/plus');">+</button>
+	<button id="minus" onclick="doaction('/minus');">-</button>
+	<button id="stop" onclick="doaction('/stop');">Stop</button>
+	<button id="kill" onclick="doaction('/kill');">Kill</button>
+	
+	<div id="chart"></div>
+
+	<div>
+		<div class="row">
+			<div>
+				<p id="wind"></p>
+			</div>
+		</div>
+	</div>
+
+
+
+	<script type="text/javascript">
+		(function(chartselector) {
+
+			var w = 960, h = 500;
+
+			var layout = [ {
+				x : 200,
+				y : 200,
+				r : 150,
+				m : 50,
+				ticks : 4,
+				mark : 'line'
+			} ];
+			var charts = layout.map(function(d) {
+				return NBXDialChart().width(d.r * 2).height(d.r * 2).domain(
+						[ 0, d.m ]).range([ -150, 150 ]).minorTicks(d.ticks)
+						.minorMark(d.mark);
+			});
+
+			var svg = d3.select(chartselector).append('svg:svg').attr('width',
+					w).attr('height', h);
+
+			var dials = svg.selectAll('g.dial').data(layout).enter().append(
+					'svg:g').attr('class', 'dial').attr('id', function(d, i) {
+				return 'dial-' + i;
+			}).attr('transform', function(d) {
+				return 'translate(' + (d.x - d.r) + ',' + (d.y - d.r) + ')';
+			});
+
+			dials.each(function(d, i) {
+				d3.select(this).data([ 20 ]).call(charts[i]);
+			});
+
+			window.transition = function() {
+				dials.each(function(d, i) {
+					var stat = status();
+					d3.select(this).data([stat.current]).call(charts[i]);
+				});
+			};
+
+
+		})('#chart');
+		
+		
+	</script>
+</body>
+</html>
+
+
