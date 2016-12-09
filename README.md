@@ -33,6 +33,47 @@ Cloud Foundry(PCF).  This demo runs SCDF on PCF, so start [here](http://cloud.sp
 
 You'll need a PCF environment available, with MySQL, RabbitMQ, and Redis installed.  We're using the SCDF Rabbit bindings for this demo, not the Kafka bindings.  Follow the instructions above to download the jar files, deploy the dataflow server application to PCF, and then run the shell locally.
 
+Once the shells starts, target the dataflow application URL as directed in the instructions, and import the rabbit binder apps.
+
+Now you are ready to create the azure source and sink apps.  Run these commands to install the apps, either from my blob store on azure, or your own blobstore, which must be accessible from Azure (not a local file URL).
+
+```app register --name azure-iot-hub --type source --uri https://mjeffriesblob.blob.core.windows.net/jars/azure-iot-hub-0.0.1-SNAPSHOT.jar
+app info --id source:azure-iot-hub
+```
+
+```app register --name azure-iot-output --type sink --uri https://mjeffriesblob.blob.core.windows.net/jars/azure-iot-output-0.0.1-SNAPSHOT.jar
+app info --id sink:azure-iot-output
+```
+
+Now you are ready to create and deploy the stream to use these apps.  Just substitute the Azure IoT Hub values from when you set up your IoT hub
+on Azure.  
+
+```stream create --name aztest4 --definition "azure-iot-hub --hubendpoint=HUB_ENDPOINT_URL --hubkey=HUB_KEY--hubname=HUB_NAME | azure-iot-output --hostname=HOST_NAME --hubkey=HUB_KEY"
+
+stream deploy --name aztest4 --properties "app.azure-iot-hub.spring.cloud.deployer.cloudfoundry.memory=2048,app.azure-iot-output.spring.cloud.deployer.cloudfoundry.memory=2048,app.azure-iot-output.spring.cloud.deployer.cloudfoundry.services=redis"
+
+stream list
+```
+
+Now you can build and push the azure-iot-device app to PCF.  Here is a sample manifest.yml content, just create this file in the azure-iot-device folder and again substitute your values.  Login to your PCF environment and run "cf push" from the azure-iot-device folder.
+
+```---
+applications:
+- name: azure-device-YOUR_INITIALS
+  memory: 1G
+  buildpack: https://github.com/cloudfoundry/java-buildpack
+  path: ./target/azure-iot-device-0.0.1-SNAPSHOT.jar
+  env:
+    HOSTNAME: HOST_NAME
+    DEVICE_ID: DEVICE_ID
+    SHARED_ACCESS_KEY: SHARED_ACCESS_KEY
+```
+
+
+
+    
+
+
 
 
 
