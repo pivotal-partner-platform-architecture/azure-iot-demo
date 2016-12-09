@@ -20,7 +20,7 @@ the average wind speed is less than 10 mph, it sends a command to the virtual de
 10 and 30 is green, and above 30 is red.  Commands are sent to the device only when the color needs to be changed.
 
 # Azure IoT Hub setup
-You'll need an Azure account, and create an IoT Hub to use, follow the directions [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-java-java-getstarted) up to and including the first sample application to create a device identity.  As you go along, be sure to capture:
+You'll need an Azure account, and an IoT Hub to use. Follow the directions [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-java-java-getstarted) up to and including the first sample application to create a device identity.  As you go along, be sure to capture:
 * Hostname
 * iothubowner - Connection String
 * iothubowner - Primary Key
