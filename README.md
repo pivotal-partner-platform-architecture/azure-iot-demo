@@ -7,7 +7,8 @@ This demo is composed of the following applications:
 # azure-iot-device
 This application represents a virtual wind speed device which shows the current wind speed as a dial on the UI, and also
 sends the current wind speed to the Azure IoT Hub.  It also listens for commands sent to the device from the Azure IoT Hub.
-![Azure Demo App](/images/azureapp.png)
+
+![Azure Demo App](/images/azureapp.jpeg)
  
 # azure-iot-hub
 This application listens for messages send to the Azure IoT Hub, and publishes them to the Spring Cloud Data Flow (SCDF) pipeline.  This application
