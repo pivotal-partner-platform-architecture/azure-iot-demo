@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Implementation-Title: azure-iot-create
+Implementation-Version: 0.0.1-SNAPSHOT
+Archiver-Version: Plexus Archiver
+Built-By: mjeffries
+Implementation-Vendor-Id: io.pivotal.azureiot.create
+Implementation-Vendor: Pivotal Software, Inc.
+Main-Class: io.pivotal.azureiot.create.AddDevice
+Start-Class: io.pivotal.azureiot.create.AddDevice
+Created-By: Apache Maven 3.2.2
+Build-Jdk: 1.8.0_05
