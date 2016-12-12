@@ -10,7 +10,7 @@ sends the current wind speed to the Azure IoT Hub.  It also listens for commands
 
 ![Azure Demo App](/images/azureapp.jpeg)
  
-# azure-iot-device
+# azure-iot-create
 This application is used to add a device to the Azure IoT Hub.  You supply the connection string and device id to add, and the application will display the device key.
 
 # azure-iot-hub
@@ -40,6 +40,7 @@ cd azure-iot-create
 mvn clean package
 java -jar target/create-device-identity-1.0-SNAPSHOT.jar CONNECTION_STRING DEVICE_ID
 ```
+Please note the displayed device key that was generated.
 
 # Build the other applications
 ```
