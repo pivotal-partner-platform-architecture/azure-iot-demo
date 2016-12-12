@@ -62,7 +62,7 @@ You'll need a PCF environment available, with MySQL, RabbitMQ, and Redis install
 
 Once the shells starts, target the dataflow application URL as directed in the instructions, and import the rabbit binder apps.
 
-Now you are ready to create the azure source and sink apps.  Run these commands to install the apps, either from my blob store on azure, or your own blobstore, which must be accessible from your PCF environment (not a local file URL).
+Now you are ready to create the azure source and sink apps.  Run these commands to install the apps, either from my blob store on azure, your own blobstore, or your maven repo, which must be accessible from your PCF environment (not a local file URL).  If you have a maven repo, see the SCDF docs for the maven repo syntax.
 
 ```
 app register --name azure-iot-hub --type source --uri https://mjeffriesblob.blob.core.windows.net/jars/azure-iot-hub-0.0.1-SNAPSHOT.jar
