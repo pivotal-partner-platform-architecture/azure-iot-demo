@@ -29,8 +29,6 @@ You'll need an Azure account, and an IoT Hub to use. Follow the directions [here
 * iothubowner - Primary Key
 * Messaging - Event Hub Compatible Name
 * Messaging - Event Hub Compatible Endpoint
-* Sample application output - Device ID
-* Sample application output - Device Key
 
 # Add your virtual device to Azure IoT Hub
 Use the azure-iot-create application to add a device to your IoT Hub account.  Supply the entire connection string in double quotes for the first argument, and the new device ID as the second argument (ex. myFirstJavaDevice).
@@ -40,7 +38,7 @@ cd azure-iot-create
 mvn clean package
 java -jar target/create-device-identity-1.0-SNAPSHOT.jar CONNECTION_STRING DEVICE_ID
 ```
-Please note the displayed device key that was generated.
+Please sure to capture the displayed device key that was generated.
 
 # Build the other applications
 ```
