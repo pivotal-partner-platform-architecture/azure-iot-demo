@@ -1,5 +1,5 @@
 # azure-iot-demo
-Demo application of a virtual device running on the Azure IoT Hub.
+Demo application of a virtual device running on the Azure IoT Hub, publishing events to a Spring Cloud Data Flow (SCDF) server and receiving commands back.
 
 # Description
 This demo is composed of the following applications:
@@ -10,6 +10,9 @@ sends the current wind speed to the Azure IoT Hub.  It also listens for commands
 
 ![Azure Demo App](/images/azureapp.jpeg)
  
+# azure-iot-device
+This application is used to add a device to the Azure IoT Hub.  You supply the connection string and device id to add, and the application will display the device key.
+
 # azure-iot-hub
 This application listens for messages send to the Azure IoT Hub, and publishes them to the Spring Cloud Data Flow (SCDF) pipeline.  This application
 is an SCDF source app.
@@ -20,7 +23,7 @@ the average wind speed is less than 10 mph, it sends a command to the virtual de
 10 and 30 is green, and above 30 is red.  Commands are sent to the device only when the color needs to be changed.
 
 # Azure IoT Hub setup
-You'll need an Azure account, and an IoT Hub to use. Follow the directions [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-java-java-getstarted) up to and including the first sample application to create a device identity.  As you go along, be sure to capture:
+You'll need an Azure account, and an IoT Hub to use. Follow the directions [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-java-java-getstarted) up to but not including the first sample application to create a device identity.  As you go along, be sure to capture:
 * Hostname
 * iothubowner - Connection String
 * iothubowner - Primary Key
@@ -29,8 +32,31 @@ You'll need an Azure account, and an IoT Hub to use. Follow the directions [here
 * Sample application output - Device ID
 * Sample application output - Device Key
 
+# Add your virtual device to Azure IoT Hub
+Use the azure-iot-create application to add a device to your IoT Hub account.  Supply the entire connection string in double quotes for the first argument, and the new device ID as the second argument (ex. myFirstJavaDevice).
+
+```
+cd azure-iot-create
+mvn clean package
+java -jar target/create-device-identity-1.0-SNAPSHOT.jar CONNECTION_STRING DEVICE_ID
+```
+
+# Build the other applications
+```
+cd azure-iot-hub
+mvn clean package -DskipTests
+
+cd azure-iot-device
+mvn clean package -DskipTests
+
+cd azure-iot-output
+mvn clean package -DskipTests
+
+```
+After building the azure-iot-hub and azure-iot-output projects, upload the jar files to the Azure blob store (or S3 or maven repo).
+
 # Spring Cloud Data Flow setup
-Spring Cloud Data Flow [SCDF](https://cloud.spring.io/spring-cloud-dataflow/) is a great tool for creating data microservices which can be deployed to Pivotal
+Spring Cloud Data Flow (https://cloud.spring.io/spring-cloud-dataflow/) is a great tool for creating data microservices which can be deployed to Pivotal
 Cloud Foundry(PCF).  This demo runs SCDF on PCF, so start [here](http://cloud.spring.io/spring-cloud-dataflow-server-cloudfoundry/) for details on setting up SCDF on PCF. I used the release version 1.0.1 for this demo, so click [here](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.0.1.RELEASE/reference/htmlsingle/) for step by step instructions.   
 
 You'll need a PCF environment available, with MySQL, RabbitMQ, and Redis installed.  We're using the SCDF Rabbit bindings for this demo, not the Kafka bindings.  Follow the instructions above to download the jar files, deploy the dataflow server application to PCF, and then run the shell locally.
