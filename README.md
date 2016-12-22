@@ -38,7 +38,7 @@ cd azure-iot-create
 mvn clean package
 java -jar target/create-device-identity-1.0-SNAPSHOT.jar CONNECTION_STRING DEVICE_ID
 ```
-Please sure to capture the displayed device key that was generated.
+Please sure to capture the displayed device key that was generated, you'll need it for your application manifest below.
 
 # Build the other applications
 ```
@@ -98,7 +98,7 @@ applications:
   env:
     HOSTNAME: HOST_NAME
     DEVICE_ID: DEVICE_ID
-    SHARED_ACCESS_KEY: SHARED_ACCESS_KEY
+    SHARED_ACCESS_KEY: DEVICE_KEY
 ```
 
 Once the app is deployed, note the URL from the output, and load the app into your browser.  Click the "Start" button to start sending data to the Azure IoT Hub, and "Stop" to pause the data.  You can use the "+" and "-" buttons to adjust the wind speed, then wait around 30 seconds for the background color to change (at 10 and 30 mph).
