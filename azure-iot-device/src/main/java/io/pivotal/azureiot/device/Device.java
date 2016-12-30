@@ -1,5 +1,7 @@
 package io.pivotal.azureiot.device;
 
+import io.pivotal.azureiot.autoconfigure.AzureIotProperties;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Random;
@@ -10,14 +12,13 @@ import javax.annotation.PostConstruct;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.iothub.DeviceClient;
-import com.microsoft.azure.iothub.IotHubClientProtocol;
 import com.microsoft.azure.iothub.IotHubEventCallback;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.IotHubStatusCode;
@@ -26,17 +27,16 @@ import com.microsoft.azure.iothub.MessageCallback;
 
 @Component
 public class Device {
-	@Value("${hostname}")
-	private String hostname;
-
-	@Value("${device.id}")
-	private String deviceId;
-
-	@Value("${shared.access.key}")
-	private String sharedAccessKey;
-
-	private static final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+	
+	@Autowired
 	private DeviceClient client;
+
+	@Autowired
+	private IotHubEventCallback callback;
+
+	@Autowired
+	private AzureIotProperties properties;
+
 	private boolean paused = true;
 	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	private MessageSender sender = new MessageSender();
@@ -45,9 +45,6 @@ public class Device {
 
 	@PostConstruct
 	public void startup() throws IOException, URISyntaxException {
-		String connString = "HostName=" + hostname + ";DeviceId=" + deviceId
-				+ ";SharedAccessKey=" + sharedAccessKey;
-		client = new DeviceClient(connString, protocol);
 		client.open();
 		executor.execute(sender);
 
@@ -148,7 +145,7 @@ public class Device {
 					if (!paused) {
 						status.setCurrent(calculateWindSpeed(rand, status.getCurrent()));
 						TelemetryDataPoint telemetryDataPoint = new TelemetryDataPoint();
-						telemetryDataPoint.deviceId = deviceId;
+						telemetryDataPoint.deviceId = properties.getDeviceId();
 						telemetryDataPoint.windSpeed = status.getCurrent();
 
 						String msgStr = telemetryDataPoint.serialize();
