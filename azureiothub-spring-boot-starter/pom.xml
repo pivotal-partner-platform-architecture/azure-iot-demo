@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>io.pivotal.azureiot.sampleapp</groupId>
+	<groupId>io.pivotal.azureiothub</groupId>
 	<artifactId>azureiothub-spring-boot-starter</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -17,17 +17,10 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>io.pivotal.azureiot.sampleapp</groupId>
+			<groupId>io.pivotal.azureiothub</groupId>
 			<artifactId>azureiothub-spring-boot-autoconfigure</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-		<dependency>
-			<groupId>com.microsoft.azure.iothub-java-client</groupId>
-			<artifactId>iothub-java-device-client</artifactId>
-			<version>1.0.14</version>
-		</dependency>
-
 	</dependencies>
 
 	<dependencyManagement>

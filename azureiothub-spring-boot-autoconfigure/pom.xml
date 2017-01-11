@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>io.pivotal.azureiot.sampleapp</groupId>
+	<groupId>io.pivotal.azureiothub</groupId>
 	<artifactId>azureiothub-spring-boot-autoconfigure</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
@@ -33,14 +33,7 @@
  			<optional>true</optional>
  		</dependency>
  
-		<dependency>
- 			<groupId>junit</groupId>
- 			<artifactId>junit</artifactId>
- 			<scope>test</scope>
- 		</dependency>
-
-
-	</dependencies>
+ 	</dependencies>
 
 	<dependencyManagement>
 		<dependencies> <!-- The parent should provide all that -->

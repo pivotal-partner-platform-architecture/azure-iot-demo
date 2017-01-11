@@ -21,7 +21,6 @@ import com.google.gson.Gson;
 import com.microsoft.azure.iothub.DeviceClient;
 import com.microsoft.azure.iothub.IotHubEventCallback;
 import com.microsoft.azure.iothub.IotHubMessageResult;
-import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.MessageCallback;
 
@@ -32,7 +31,7 @@ public class Device {
 	private DeviceClient client;
 
 	@Autowired
-	private IotHubEventCallback callback;
+	private IotHubEventCallback messageSenderCallback;
 
 	@Autowired
 	private AzureIotProperties properties;
@@ -48,7 +47,7 @@ public class Device {
 		client.open();
 		executor.execute(sender);
 
-		MessageCallbackImpl receiver = new MessageCallbackImpl();
+		CommandCallback receiver = new CommandCallback();
 
 		Object context = null;
 		client.setMessageCallback(receiver, context);
@@ -118,21 +117,6 @@ public class Device {
 		}
 	}
 
-	private class EventCallback implements IotHubEventCallback {
-		public void execute(IotHubStatusCode status, Object context) {
-			if (! IotHubStatusCode.OK_EMPTY.equals(status))
-			{
-				System.out.println("IoT Hub responded to message with status: "	+ status.name());
-			}
-
-			if (context != null) {
-				synchronized (context) {
-					context.notify();
-				}
-			}
-		}
-	}
-
 	private class MessageSender implements Runnable {
 		public volatile boolean stopThread = false;
 
@@ -153,8 +137,7 @@ public class Device {
 						System.out.println("Sending: " + msgStr);
 
 						Object lockobj = new Object();
-						EventCallback callback = new EventCallback();
-						client.sendEventAsync(msg, callback, lockobj);
+						client.sendEventAsync(msg, messageSenderCallback, lockobj);
 
 						synchronized (lockobj) {
 							lockobj.wait();
@@ -176,7 +159,7 @@ public class Device {
 		}
 	}
 
-	private class MessageCallbackImpl implements MessageCallback {
+	private class CommandCallback implements MessageCallback {
 
 		public IotHubMessageResult execute(Message msg, Object context) {
 			String deviceCommand = new String(msg.getBytes());
