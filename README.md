@@ -9,7 +9,7 @@ This application represents a virtual wind speed device which shows the current 
 sends the current wind speed to the Azure IoT Hub.  It also listens for commands sent to the device from the Azure IoT Hub.
 
 ![Azure Demo App](/images/azureapp.jpeg)
- 
+
 # azure-iot-create
 This application is used to add a device to the Azure IoT Hub.  You supply the connection string and device id to add, and the application will display the device key.
 
@@ -18,9 +18,18 @@ This application listens for messages send to the Azure IoT Hub, and publishes t
 is an SCDF source app.
 
 # azure-iot-output
-This application is an SCDF sink which listens on the pipeline for messages, calculates the average wind speed over the last 30 seconds or so, and stores the results in Redis.  If 
+This application is an SCDF sink which listens on the pipeline for messages, calculates the average wind speed over the last 30 seconds or so, and stores the results in Redis.  If
 the average wind speed is less than 10 mph, it sends a command to the virtual device to set the background color to yellow.  Likewise, an average between
 10 and 30 is green, and above 30 is red.  Commands are sent to the device only when the color needs to be changed.
+
+# azureiothub-spring-boot-autoconfigure
+Spring boot starter auto config project.  It contains the azure libraries as well as components that
+can be autowired to your application.  You don't include this project directly as a dependency - instead
+you specify the azureiothub-spring-boot-starter dependency, which brings this project along for the ride.
+
+# azureiothub-spring-boot-starter
+Spring boot starter project for the Azure IoT Hub.  Any applications wanting to use the azure library
+and/or common components just need to include this starter as a maven POM dependency.
 
 # Azure IoT Hub setup
 You'll need an Azure account, and an IoT Hub to use. Follow the directions [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-java-java-getstarted) up to but not including the first sample application to create a device identity.  As you go along, be sure to capture:
@@ -104,13 +113,3 @@ applications:
 Once the app is deployed, note the URL from the output, and load the app into your browser.  Click the "Start" button to start sending data to the Azure IoT Hub, and "Stop" to pause the data.  You can use the "+" and "-" buttons to adjust the wind speed, then wait around 30 seconds for the background color to change (at 10 and 30 mph).
 
 Use "cf apps" to get the name of the apps deployed to PCF by SCDF, and use "cf logs" to see the messages processed by each component application.
-
-
-
-
-    
-
-
-
-
-
