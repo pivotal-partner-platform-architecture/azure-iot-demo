@@ -9,7 +9,6 @@
 	<name>Spring Boot AutoConfiguration</name>
 
 	<modules>
-		<module>azureiothub-sample-app</module>
 		<module>azureiothub-spring-boot-autoconfigure</module>
 		<module>azureiothub-spring-boot-starter</module>
 		<module>azure-iot-create</module>
@@ -19,4 +18,3 @@
 	</modules>
 
 </project>
-

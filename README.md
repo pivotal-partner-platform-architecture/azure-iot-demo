@@ -39,29 +39,22 @@ You'll need an Azure account, and an IoT Hub to use. Follow the directions [here
 * Messaging - Event Hub Compatible Name
 * Messaging - Event Hub Compatible Endpoint
 
+# Build the projects
+To build all the projects, just open a shell in the root of the project, and run
+```
+cd azure-iot-demo
+mvn clean package
+```
+
+After building the azure-iot-hub and azure-iot-output projects, upload the jar files to the Azure blob store (or S3 or maven repo).
+
 # Add your virtual device to Azure IoT Hub
 Use the azure-iot-create application to add a device to your IoT Hub account.  Supply the entire connection string in double quotes for the first argument, and the new device ID as the second argument (ex. myFirstJavaDevice).
 
 ```
-cd azure-iot-create
-mvn clean package
-java -jar target/create-device-identity-1.0-SNAPSHOT.jar CONNECTION_STRING DEVICE_ID
+java -jar azure-iot-create/target/create-device-identity-1.0-SNAPSHOT.jar CONNECTION_STRING DEVICE_ID
 ```
 Please sure to capture the displayed device key that was generated, you'll need it for your application manifest below.
-
-# Build the other applications
-```
-cd azure-iot-hub
-mvn clean package -DskipTests
-
-cd azure-iot-device
-mvn clean package -DskipTests
-
-cd azure-iot-output
-mvn clean package -DskipTests
-
-```
-After building the azure-iot-hub and azure-iot-output projects, upload the jar files to the Azure blob store (or S3 or maven repo).
 
 # Spring Cloud Data Flow setup
 Spring Cloud Data Flow (https://cloud.spring.io/spring-cloud-dataflow/) is a great tool for creating data microservices which can be deployed to Pivotal
