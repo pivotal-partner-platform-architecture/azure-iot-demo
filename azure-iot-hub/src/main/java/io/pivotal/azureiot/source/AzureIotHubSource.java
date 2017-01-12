@@ -140,5 +140,4 @@ public class AzureIotHubSource {
 		}
 		return client;
 	}
-
 }
