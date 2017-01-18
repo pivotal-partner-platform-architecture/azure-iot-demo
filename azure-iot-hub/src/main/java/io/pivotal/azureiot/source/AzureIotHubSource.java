@@ -27,18 +27,15 @@ public class AzureIotHubSource {
 
 	private Queue<String> messageQueue = new ConcurrentLinkedQueue<String>();
 	private List<EventHubClient> clientList = new ArrayList<EventHubClient>();
-
+	
 	@Autowired
 	private AzureIotHubSourceProperties config;
-
+	
 	@PostConstruct
 	public void startup() {
 		System.out.println("startup");
 
-		String connectString = "Endpoint=" + config.getHubendpoint()
-				+ ";EntityPath=" + config.getHubname()
-				+ ";SharedAccessKeyName=" + config.getHubkeyname()
-				+ ";SharedAccessKey=" + config.getHubkey();
+		String connectString = config.buildConnectionString();
 
 		System.out.println("connectString = " + connectString);
 

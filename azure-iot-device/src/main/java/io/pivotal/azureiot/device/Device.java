@@ -1,6 +1,6 @@
 package io.pivotal.azureiot.device;
 
-import io.pivotal.azureiot.autoconfigure.AzureIotProperties;
+import io.pivotal.azureiot.autoconfigure.AzureIotAutoConfiguration.DeviceClientFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
@@ -25,25 +26,30 @@ import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.MessageCallback;
 
 @Component
+@EnableConfigurationProperties({ AzureIotHubDeviceProperties.class })
 public class Device {
 	
 	@Autowired
-	private DeviceClient client;
+	private DeviceClientFactory clientFactory;
 
 	@Autowired
 	private IotHubEventCallback messageSenderCallback;
 
 	@Autowired
-	private AzureIotProperties properties;
+	private AzureIotHubDeviceProperties properties;
 
 	private boolean paused = true;
 	private ExecutorService executor = Executors.newFixedThreadPool(1);
 	private MessageSender sender = new MessageSender();
 
+	private 	DeviceClient client;
+
 	private DeviceStatus status = new DeviceStatus();
 
 	@PostConstruct
 	public void startup() throws IOException, URISyntaxException {
+		String connString = properties.buildConnectionString();
+		client = clientFactory.createDeviceClient(connString);
 		client.open();
 		executor.execute(sender);
 
@@ -122,11 +128,16 @@ public class Device {
 
 		public void run() {
 			try {
+				System.out.println("starting MessageSender.........");
 				status.setCurrent(20.0);
 				Random rand = new Random();
+				
+				System.out.println("stopThread = " + stopThread);
+				System.out.println("paused = " + paused);
 
 				while (!stopThread) {
 					if (!paused) {
+						System.out.println("calculating......");
 						status.setCurrent(calculateWindSpeed(rand, status.getCurrent()));
 						TelemetryDataPoint telemetryDataPoint = new TelemetryDataPoint();
 						telemetryDataPoint.deviceId = properties.getDeviceId();
@@ -142,13 +153,15 @@ public class Device {
 						synchronized (lockobj) {
 							lockobj.wait();
 						}
-
 					}
 					Thread.sleep(5000);
+					System.out.println("after sleep");
 				}
 			} catch (InterruptedException e) {
-				System.out.println("Finished.");
+				System.out.println("Finished." + e.getMessage());
+				e.printStackTrace();
 			}
+			System.out.println("Finished.");
 		}
 
 		private double calculateWindSpeed(Random rand, double averageSpeed) {
@@ -218,5 +231,4 @@ public class Device {
 			this.current = current;
 		}
 	}
-
 }

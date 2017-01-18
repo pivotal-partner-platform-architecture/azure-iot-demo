@@ -75,4 +75,14 @@ public class AzureIotHubSourceProperties {
 		this.partitions = partitions;
 	}
 
+	public String buildConnectionString()
+	{
+		String connectString = "Endpoint=" + getHubendpoint()
+				+ ";EntityPath=" + getHubname()
+				+ ";SharedAccessKeyName=" + getHubkeyname()
+				+ ";SharedAccessKey=" + getHubkey();
+		return connectString;
+	}
+
+
 }

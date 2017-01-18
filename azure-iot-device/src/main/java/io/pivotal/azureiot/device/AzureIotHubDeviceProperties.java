@@ -1,10 +1,10 @@
-package io.pivotal.azureiot.autoconfigure;
+package io.pivotal.azureiot.device;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties("azureiot")
-public class AzureIotProperties {
+public class AzureIotHubDeviceProperties {
 
 	@Value("${hostname}")
 	private String hostname;
@@ -15,6 +15,13 @@ public class AzureIotProperties {
 	@Value("${shared.access.key}")
 	private String sharedAccessKey;
 
+	public String buildConnectionString()
+	{
+		String connectString = "HostName=" + getHostname() + ";DeviceId="
+				+ getDeviceId() + ";SharedAccessKey=" + getSharedAccessKey();
+		return connectString;
+	}
+	
 	public String getHostname() {
 		return hostname;
 	}
