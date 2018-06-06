@@ -260,6 +260,24 @@ stream deploy --name iot-stream --properties "deployer.azure-iot-hub.memory=2g,d
 stream list
 ```
 
+# Validate that the azure-iot-output was bound to Redis
+The deploy command above should deploy the azure-iot-output app to the Redis service instance we created earlier.  You can run the "cf services"
+ command to see if the azure-iot-output app is listed as a bound app for the redis service:
+```
+cf services
+
+name       service      plan    bound apps                                                                                                last operation
+my_mysql   cleardb      spark   data-flow-server                                                                                          create succeeded
+rabbit     cloudamqp    lemur   data-flow-server-0VmmHoy-iot-stream-azure-iot-hub, data-flow-server-0VmmHoy-iot-stream-azure-iot-output   create succeeded
+redis      rediscloud   30mb    data-flow-server-0VmmHoy-iot-stream-azure-iot-output                                                      create succeeded
+```
+
+If not bound, go ahead and bind explicitly and restart the app.  Both apps should start successfully after a few minutes.
+```
+cf bs data-flow-server-0VmmHoy-iot-stream-azure-iot-output redis
+cf restage data-flow-server-0VmmHoy-iot-stream-azure-iot-output
+```
+
 # Deploy your Device app to PCF
 Now you can build and push the azure-iot-device app to PCF.  Here is a sample manifest.yml content, just create this file in the azure-iot-device folder and again substitute your values.  Use the output of the "create-device-identity" app (above) to get the value for [Device Key]
 
