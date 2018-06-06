@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <title>Azure IoT Device</title>
 
-<script type="text/javascript" src="http://mbostock.github.com/d3/d3.min.js"></script>
+<script src='https://d3js.org/d3.v2.min.js'></script>
 <script type="text/javascript" src="dial.charts.js"></script>
 <script type="text/javascript">
 
@@ -24,7 +24,9 @@ function status()
     xhttp.send();
     // returns status object - String status, double average, double current
 	var obj = JSON.parse(xhttp.responseText);
-    document.getElementById("wind").innerHTML = 'Current Wind Speed is ' + obj.current + ' mph.';
+	var current = obj.current.toFixed();
+
+    document.getElementById("wind").innerHTML = 'Current Wind Speed is ' + current + ' mph.';
     var color = obj.status;
     var mappedColor = "white";
     

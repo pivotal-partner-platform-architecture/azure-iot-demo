@@ -36,6 +36,9 @@ public class AddDevice {
 	
 	private void addDevice(String conn, String id) 
 	{
+		System.out.println("\nconn: " + conn);
+		System.out.println("\nDevice id: " + id);
+		
 		try {
 			RegistryManager registryManager = RegistryManager.createFromConnectionString(conn);
 			Device device = Device.createFromId(id, null, null);

@@ -17,6 +17,7 @@
 package io.pivotal.azureiot.sink;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -49,6 +50,8 @@ public class AzureIotOutputSource extends AbstractCloudConfig {
 	private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
 
 	private ServiceClient client;
+	
+	private DecimalFormat formatter = new DecimalFormat("#0.00");
 
 	@Autowired
 	private AzureIotOutputSourceProperties config;
@@ -117,7 +120,7 @@ public class AzureIotOutputSource extends AbstractCloudConfig {
 			sum += Double.valueOf(speed);
 		}
 		double average = sum / speeds.size();
-		System.out.println("average: " + average + " for " + speeds.size() + " values");
+		System.out.println("average: " + formatter.format(average) + " for " + speeds.size() + " values");
 		
 		BoundHashOperations<String, String, String> hashOps = template.boundHashOps(deviceKey);
 		
@@ -185,11 +188,16 @@ public class AzureIotOutputSource extends AbstractCloudConfig {
 					.setDeliveryAcknowledgement(DeliveryAcknowledgement.Full);
 
 			client.send(command.getDeviceId(), messageToSend);
+			System.out.println("Command sent to device");
 
 			FeedbackBatch feedbackBatch = feedbackReceiver.receive(10000);
 			if (feedbackBatch != null) {
 				System.out.println("Command feedback received, feedback time: "
 						+ feedbackBatch.getEnqueuedTimeUtc().toString());
+			}
+			else
+			{
+				System.out.println("feedbackBatch was null.");
 			}
 
 			if (feedbackReceiver != null)
@@ -199,6 +207,7 @@ public class AzureIotOutputSource extends AbstractCloudConfig {
 			client.close();
 			
 		} catch (IOException | InterruptedException e) {
+			System.err.println("Error sending command to device");
 			e.printStackTrace();
 		}
 	}
