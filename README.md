@@ -32,12 +32,77 @@ Spring boot starter project for the Azure IoT Hub.  Any applications wanting to 
 and/or common components just need to include this starter as a maven POM dependency.
 
 # Azure IoT Hub setup
-You'll need an Azure account, and an IoT Hub to use. Follow the directions [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-java-java-getstarted) up to but not including the first sample application to create a device identity.  As you go along, be sure to capture:
-* Hostname
-* iothubowner - Connection String
-* iothubowner - Primary Key
-* Messaging - Event Hub Compatible Name
-* Messaging - Event Hub Compatible Endpoint
+You'll need an Azure account, and an IoT Hub to use. Follow the directions [here]( https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-send-telemetry-java) up to but not including the first sample application to create a device identity.  As you go along, be sure to capture:
+* IoT Hub Name
+* Device ID
+* IoT Hub Hostname
+* Device Connection String
+* Event Hub Compatible Endpoint
+* Event Hub Compatible Path
+* IOT Hub owner Primary Key
+* IoT Hub Connection String
+
+Here is an example of the Azure CLI commands in the link above, and the results of each command:
+
+```
+// Add required extension
+az extension add --name azure-cli-iot-ext
+
+// Create the device - the IoT Hub Name is mjeffries-iot-hub, and the Device ID is MyJavaDevice:
+az iot hub device-identity create --hub-name mjeffries-iot-hub --device-id MyJavaDevice
+{
+  "authentication": {
+    "symmetricKey": {
+      "primaryKey": "2kX/eAIsbhPFzsCVzs8FuSm2/Ajute85uTa4Fkt1H5I=",
+      "secondaryKey": "CBhs/fmu8Don1hMbGocNsyxK5aAN61K72hHXp7ORVpE="
+    },
+    "type": "sas",
+    "x509Thumbprint": {
+      "primaryThumbprint": null,
+      "secondaryThumbprint": null
+    }
+  },
+  "capabilities": {
+    "iotEdge": false
+  },
+  "cloudToDeviceMessageCount": 0,
+  "connectionState": "Disconnected",
+  "connectionStateUpdatedTime": "0001-01-01T00:00:00",
+  "deviceId": "MyJavaDevice",
+  "etag": "ODQxNDA5NDU1",
+  "generationId": "636633062050290058",
+  "lastActivityTime": "0001-01-01T00:00:00",
+  "status": "enabled",
+  "statusReason": null,
+  "statusUpdatedTime": "0001-01-01T00:00:00"
+}
+
+// Device Connection String - the IoT Hub Name is mjeffries-iot-hub, and the Device ID is MyJavaDevice:
+az iot hub device-identity show-connection-string --hub-name mjeffries-iot-hub --device-id MyJavaDevice --output table
+-------------------------------------------------------------------------------------------------------------------------------
+HostName=mjeffries-iot-hub.azure-devices.net;DeviceId=MyJavaDevice;SharedAccessKey=2kX/eAIsbhPFzsCVzs8FuSm2/Ajute85uTa4Fkt1H5I=
+
+Note that the Hostname is the first part of the connection string, ex, mjeffries-iot-hub.azure-devices.net
+
+// Events hub compatible Endpoint - the IoT Hub Name is mjeffries-iot-hub:
+az iot hub show --query properties.eventHubEndpoints.events.endpoint --name mjeffries-iot-hub
+"sb://ihsuproddmres020dednamespace.servicebus.windows.net/"
+
+// Events Hub Compatible path - the IoT Hub Name is mjeffries-iot-hub:
+az iot hub show --query properties.eventHubEndpoints.events.path --name mjeffries-iot-hub
+"iothub-ehub-mjeffries-488688-1cf9d45391"
+
+// IOT Hub owner Primary Key- the IoT Hub Name is mjeffries-iot-hub:
+az iot hub policy show --name iothubowner --query primaryKey --hub-name mjeffries-iot-hub
+"yvtBsXWJxEntKfiHWV5wBRuOTZpgidIFXx54NMc8IXc="
+
+// IoT Hub Connection String - the IoT Hub Name is mjeffries-iot-hub:
+az iot hub show-connection-string --hub-name mjeffries-iot-hub --output table
+-----------------------------------------------------------------------------------------------------------------------------------------
+HostName=mjeffries-iot-hub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=yvtBsXWJxEntKfiHWV5wBRuOTZpgidIFXx54NMc8IXc=
+
+```
+
 
 # Build the projects
 To build all the projects, just open a shell in the root of the project, and run
@@ -48,11 +113,25 @@ mvn clean package
 
 After building the azure-iot-hub and azure-iot-output projects, upload the jar files to the Azure blob store (or S3 or maven repo).
 
-# Add your virtual device to Azure IoT Hub
-Use the azure-iot-create application to add a device to your IoT Hub account.  Supply the entire connection string in double quotes for the first argument, and the new device ID as the second argument (ex. myFirstJavaDevice).
+# Get your virtual device key from the Azure IoT Hub
+Use the azure-iot-create application to add a device to your IoT Hub account.  Supply the entire connection string in double quotes for the first argument, and the new device ID as the second argument (ex. myFirstJavaDevice).  The device should already exist from a previous step, but it will be created if it doesn't already exist.
 
 ```
-java -jar azure-iot-create/target/create-device-identity-1.0-SNAPSHOT.jar CONNECTION_STRING DEVICE_ID
+java -jar azure-iot-create/target/create-device-identity-1.0-SNAPSHOT.jar [IoT Hub Connection String] [Device ID]
+
+For example:
+java -jar azure-iot-create/target/create-device-identity-1.0-SNAPSHOT.jar  "HostName=mjeffries-iot-hub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=yvtBsXWJxEntKfiHWV5wBRuOTZpgidIFXx54NMc8IXc=" MyJavaDevice
+
+conn: HostName=mjeffries-iot-hub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=yvtBsXWJxEntKfiHWV5wBRuOTZpgidIFXx54NMc8IXc=
+
+Device id: MyJavaDevice
+
+Device already exists!
+
+Device id: MyJavaDevice
+
+Device key: 2kX/eAIsbhPFzsCVzs8FuSm2/Ajute85uTa4Fkt1H5I=
+
 ```
 Please sure to capture the displayed device key that was generated, you'll need it for your application manifest below.
 
