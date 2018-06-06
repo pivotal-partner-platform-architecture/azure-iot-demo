@@ -261,7 +261,7 @@ stream list
 ```
 
 # Validate that the azure-iot-output was bound to Redis
-The deploy command above should deploy the azure-iot-output app to the Redis service instance we created earlier.  You can run the "cf services"
+The deploy command above should deploy the azure-iot-output app, and bind it to the Redis service instance we created earlier.  You can run the "cf services"
  command to see if the azure-iot-output app is listed as a bound app for the redis service:
 ```
 cf services
