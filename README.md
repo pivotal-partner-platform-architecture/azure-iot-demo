@@ -111,10 +111,17 @@ cd azure-iot-demo
 mvn clean package
 ```
 
-After building the azure-iot-hub and azure-iot-output projects, upload the jar files to the Azure blob store (or S3 or maven repo).
+# Upload the SCDF components JAR files
+After building the azure-iot-hub and azure-iot-output projects, upload the jar files to the Azure blob store (or S3 or maven repo).  Be sure to
+allow public read access to the uploaded files.
+```
+Example:
+- https://mjeffries.blob.core.windows.net/scdf/azure-iot-hub-0.0.1-SNAPSHOT.jar
+- https://mjeffries.blob.core.windows.net/scdf/azure-iot-output-0.0.1-SNAPSHOT.jar
+```
 
 # Get your virtual device key from the Azure IoT Hub
-Use the azure-iot-create application to add a device to your IoT Hub account.  Supply the entire connection string in double quotes for the first argument, and the new device ID as the second argument (ex. myFirstJavaDevice).  The device should already exist from a previous step, but it will be created if it doesn't already exist.
+Use the azure-iot-create application to add a device to your IoT Hub account.  Supply the entire IoT Hub connection string in double quotes for the first argument, and the new device ID as the second argument (ex. myFirstJavaDevice).  The device should already exist from a previous step, but it will be created if it doesn't already exist.
 
 ```
 java -jar azure-iot-create/target/create-device-identity-1.0-SNAPSHOT.jar [IoT Hub Connection String] [Device ID]
@@ -133,55 +140,156 @@ Device id: MyJavaDevice
 Device key: 2kX/eAIsbhPFzsCVzs8FuSm2/Ajute85uTa4Fkt1H5I=
 
 ```
-Please sure to capture the displayed device key that was generated, you'll need it for your application manifest below.
+Please sure to capture the displayed Device Key that was generated, you'll need it for your application manifest below.
 
-# Spring Cloud Data Flow setup
-Spring Cloud Data Flow (https://cloud.spring.io/spring-cloud-dataflow/) is a great tool for creating data microservices which can be deployed to Pivotal
-Cloud Foundry(PCF).  This demo runs SCDF on PCF, so start [here](http://cloud.spring.io/spring-cloud-dataflow-server-cloudfoundry/) for details on setting up SCDF on PCF. We used the release version 1.0.1 for this demo, so click [here](http://docs.spring.io/spring-cloud-dataflow-server-cloudfoundry/docs/1.0.1.RELEASE/reference/htmlsingle/) for step by step instructions.   
+# Spring Cloud Data Flow (SCDF)
+Spring Cloud Data Flow (https://cloud.spring.io/spring-cloud-dataflow/) is a great tool for creating data microservices which can be deployed to Pivotal Cloud Foundry(PCF).  This demo runs SCDF on Pivotal Web Services (PWS), our hosted version of Pivotal Cloud Foundry.
 
-You'll need a PCF environment available, with MySQL, RabbitMQ, and Redis installed.  We ran the demo apps on our PCF instance running on Azure, but it will work on any IaaS.
-We're using the SCDF Rabbit bindings for this demo, not the Kafka bindings.  Follow the instructions above to download the jar files, deploy the dataflow server application to PCF, and then run the shell locally.
+# PWS setup
+You'll need to have or create an account on PWS (https://run.pivotal.io), and enter a credit card number in order get an organization with sufficient quota (~10 GB) for the demo.  Once you're logged in, go ahead and create the services instances you'll need (RabbitMQ, Redis, MySQL):
+```
+cf create-service rediscloud 30mb redis
+cf create-service cloudamqp lemur rabbit
+cf create-service cleardb spark my_mysql
+```
 
-Once the shells starts, target the dataflow application URL as directed in the instructions, and import the rabbit binder apps.
+# SCDF setup
+To start this section, create a new folder on your local machine, outside of this Github project, such as ~/scdf.  Then open your terminal and change to that directory.
 
-Now you are ready to create the azure source and sink apps.  Run these commands to install the apps, either from my blob store on azure, your own blobstore, or your maven repo, which must be accessible from your PCF environment (not a local file URL).  If you have a maven repo, see the SCDF docs for the maven repo syntax.
+Now dowload the SCDF files you'll need.  We're using SCDF release 1.5 for this demo.
+```
+wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-server-cloudfoundry/1.5.0.RELEASE/spring-cloud-dataflow-server-cloudfoundry-1.5.0.RELEASE.jar
+
+wget http://repo.spring.io/release/org/springframework/cloud/spring-cloud-dataflow-shell/1.5.0.RELEASE/spring-cloud-dataflow-shell-1.5.0.RELEASE.jar
+```
+
+# Deploy the dataflow server
+In the same folder, create a deployment manifest for the application, and edit it to include your PWS account information.  The file should be
+named "manifest.yml":
+```
+---
+applications:
+- name: data-flow-server
+  host: data-flow-server-YOUR_INITIALS
+  memory: 2G
+  disk_quota: 2G
+  instances: 1
+  path: ./spring-cloud-dataflow-server-cloudfoundry-1.5.0.RELEASE.jar
+  env:
+    SPRING_APPLICATION_NAME: data-flow-server
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_URL: https://api.run.pivotal.io
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_ORG: YOUR_ORG
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SPACE: YOUR_SPACE
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_DOMAIN: cfapps.io
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_USERNAME: YOUR_USERNAME
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_PASSWORD: YOUR_PASSWORD
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_STREAM_SERVICES: rabbit
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_TASK_SERVICES: my_mysql
+    SPRING_CLOUD_DEPLOYER_CLOUDFOUNDRY_SKIP_SSL_VALIDATION: false
+    SPRING_APPLICATION_JSON: '{"maven": { "remote-repositories": { "repo1": { "url": "https://repo.spring.io/libs-release"} } } }'
+services:
+- my_mysql
+```
+Now go ahead and deploy the dataflow server to PCF:
+```
+cf push
+```
+
+When the application deployment is completed, note the URL for the application (ex. http://data-flow-server-mj.cfapps.io), which you'll need below.
+
+# Start the dataflow Shell locally
+In the same folder, run the following command to start the shell, then enter the URL of the dataflow server application when prompted:
 
 ```
-app register --name azure-iot-hub --type source --uri https://mjeffriesblob.blob.core.windows.net/jars/azure-iot-hub-0.0.1-SNAPSHOT.jar
+java -jar spring-cloud-dataflow-shell-1.5.0.RELEASE.jar
+  ____                              ____ _                __
+ / ___| _ __  _ __(_)_ __   __ _   / ___| | ___  _   _  __| |
+ \___ \| '_ \| '__| | '_ \ / _` | | |   | |/ _ \| | | |/ _` |
+  ___) | |_) | |  | | | | | (_| | | |___| | (_) | |_| | (_| |
+ |____/| .__/|_|  |_|_| |_|\__, |  \____|_|\___/ \__,_|\__,_|
+  ____ |_|    _          __|___/                 __________
+ |  _ \  __ _| |_ __ _  |  ___| | _____      __  \ \ \ \ \ \
+ | | | |/ _` | __/ _` | | |_  | |/ _ \ \ /\ / /   \ \ \ \ \ \
+ | |_| | (_| | || (_| | |  _| | | (_) \ V  V /    / / / / / /
+ |____/ \__,_|\__\__,_| |_|   |_|\___/ \_/\_/    /_/_/_/_/_/
+
+1.5.0.RELEASE
+
+Welcome to the Spring Cloud Data Flow shell. For assistance hit TAB or type "help".
+server-unknown:>dataflow config server http://data-flow-server-mj.cfapps.io
+Shell mode: classic, Server mode: classic
+dataflow:>
+```
+
+Now enter the line below to install the default apps to SCDF:
+```
+app import --uri http://bit.ly/Celsius-SR1-stream-applications-rabbit-maven
+```
+
+# Install your custom apps
+Now you are ready to create the azure source and sink apps.  Run these commands to install the apps, referencing the blobstore location.
+
+```
+app register --name azure-iot-hub --type source --uri https://mjeffries.blob.core.windows.net/scdf/azure-iot-hub-0.0.1-SNAPSHOT.jar
 app info --id source:azure-iot-hub
 ```
 
 ```
-app register --name azure-iot-output --type sink --uri https://mjeffriesblob.blob.core.windows.net/jars/azure-iot-output-0.0.1-SNAPSHOT.jar
+app register --name azure-iot-output --type sink --uri https://mjeffries.blob.core.windows.net/scdf/azure-iot-output-0.0.1-SNAPSHOT.jar
 app info --id sink:azure-iot-output
 ```
 
-Now you are ready to create and deploy the stream to use these apps.  Just substitute the Azure IoT Hub values from when you set up your IoT hub
-on Azure, and substitute a unique value for STREAM_NAME.
+# Create your new SCDF Stream
+Now you are ready to create and deploy the stream to use these apps.  Just substitute the values from when you set up your IoT hub
+on Azure.
 
 ```
-stream create --name STREAM_NAME --definition "azure-iot-hub --hubendpoint=HUB_ENDPOINT_URL --hubkey=HUB_KEY--hubname=HUB_NAME | azure-iot-output --hostname=HOST_NAME --hubkey=HUB_KEY"
+stream create --name iot-stream --definition "azure-iot-hub --hubendpoint=[Event Hub Compatible Endpoint] --hubkey=[IOT Hub owner Primary Key] --hubname=[Event Hub Compatible Path] | azure-iot-output --hostname=[IoT Hub Hostname] --hubkey=[IOT Hub owner Primary Key]"
 
-stream deploy --name STREAM_NAME --properties "app.azure-iot-hub.spring.cloud.deployer.cloudfoundry.memory=2048,app.azure-iot-output.spring.cloud.deployer.cloudfoundry.memory=2048,app.azure-iot-output.spring.cloud.deployer.cloudfoundry.services=redis"
+Example:
+stream create --name iot-stream --definition "azure-iot-hub --hubendpoint=sb://ihsuproddmres020dednamespace.servicebus.windows.net/ --hubkey=yvtBsXWJxEntKfiHWV5wBRuOTZpgidIFXx54NMc8IXc= --hubname=iothub-ehub-mjeffries-488688-1cf9d45391 | azure-iot-output --hostname=mjeffries-iot-hub.azure-devices.net --hubkey=yvtBsXWJxEntKfiHWV5wBRuOTZpgidIFXx54NMc8IXc="
+```
+
+# Deploy your SCDF Stream
+Now you can deploy the stream.  This will take a few minutes as the dataflow server will create and deploy 2 new apps to PCF, one for each of the
+new SCDF components you created above.
+
+```
+stream deploy --name iot-stream --properties "deployer.azure-iot-hub.memory=2g,deployer.azure-iot-output.memory=2g,deployer.azure-iot-output.services=redis"
 
 stream list
 ```
 
-Now you can build and push the azure-iot-device app to PCF.  Here is a sample manifest.yml content, just create this file in the azure-iot-device folder and again substitute your values.  Login to your PCF environment and run "cf push" from the azure-iot-device folder.
+# Deploy your Device app to PCF
+Now you can build and push the azure-iot-device app to PCF.  Here is a sample manifest.yml content, just create this file in the azure-iot-device folder and again substitute your values.  Use the output of the "create-device-identity" app (above) to get the value for [Device Key]
+
+Login to your PCF environment and run "cf push" from the azure-iot-device folder.
 
 ```
 ---
 applications:
-- name: azure-device-YOUR_INITIALS
+- name: azure-device-[Your Initials]
   memory: 1G
   buildpack: https://github.com/cloudfoundry/java-buildpack
   path: ./target/azure-iot-device-0.0.1-SNAPSHOT.jar
   env:
-    HOSTNAME: HOST_NAME
-    DEVICE_ID: DEVICE_ID
-    SHARED_ACCESS_KEY: DEVICE_KEY
+    HOSTNAME: [IoT Hub Hostname]
+    DEVICE_ID: [Device ID]
+    SHARED_ACCESS_KEY: [Device Key]
+
+Example:
+---
+applications:
+- name: azure-device-mj
+  memory: 1G
+  buildpack: https://github.com/cloudfoundry/java-buildpack
+  path: ./target/azure-iot-device-0.0.1-SNAPSHOT.jar
+  env:
+    HOSTNAME: mjeffries-iot-hub.azure-devices.net
+    DEVICE_ID: MyJavaDevice
+    SHARED_ACCESS_KEY: 2kX/eAIsbhPFzsCVzs8FuSm2/Ajute85uTa4Fkt1H5I=
 ```
 
-Once the app is deployed, note the URL from the output, and load the app into your browser.  Click the "Start" button to start sending data to the Azure IoT Hub, and "Stop" to pause the data.  You can use the "+" and "-" buttons to adjust the wind speed, then wait around 30 seconds for the background color to change (at 10 and 30 mph).
+Once the device app is deployed, note the URL from the output, and load the app into your browser.  Click the "Start" button to start sending data to the Azure IoT Hub, and "Stop" to pause the data.  You can use the "+" and "-" buttons to adjust the wind speed, then wait around 30 seconds for the background color to change (at 10 and 30 mph).
 
 Use "cf apps" to get the name of the apps deployed to PCF by SCDF, and use "cf logs" to see the messages processed by each component application.
