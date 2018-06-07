@@ -1,35 +1,34 @@
 package io.pivotal.azureiot.sink;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
-class CalculatorTest {
+public class CalculatorTest {
 
 	private Calculator calculator = new Calculator();
 	
 	@Test
-	void testEmpty() 
+	public void testEmpty() 
 	{
 		List<String> values = new ArrayList<String>();
 		double average = calculator.average(values);
-		assertEquals(0.0d, average);
+		Assert.assertEquals(0.0d, average, 0.01);
 	}
 
 	@Test
-	void testOne() 
+	public void testOne() 
 	{
 		List<String> values = new ArrayList<String>();
 		values.add("1");
 		double average = calculator.average(values);
-		assertEquals(1d, average);
+		Assert.assertEquals(1d, average, 0.01);
 	}
 
 	@Test
-	void testTen() 
+	public void testTen() 
 	{
 		List<String> values = new ArrayList<String>();
 		values.add("1");
@@ -43,7 +42,7 @@ class CalculatorTest {
 		values.add("9");
 		values.add("10");
 		double average = calculator.average(values);
-		assertEquals(5.5d, average);
+		Assert.assertEquals(5.5d, average, 0.01);
 	}
 
 }
