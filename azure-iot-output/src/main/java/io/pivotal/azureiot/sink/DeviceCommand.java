@@ -15,41 +15,25 @@
 */
 package io.pivotal.azureiot.sink;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-@Component
-public class Calculator {
-
-	public double average(List<String> speeds)
+public class DeviceCommand 
+{
+	private String deviceId;
+	
+	@SuppressWarnings("unused")
+	private String status;
+	
+	@SuppressWarnings("unused")
+	private double average;
+	
+	public DeviceCommand(String deviceId, String status, double average)
 	{
-		double sum = 0.0;
-		double average = 0.0;
-		
-		for (String speed : speeds)
-		{
-			sum += Double.valueOf(speed);
-		}
-		if (speeds.size() > 0)
-		{
-			average = sum / speeds.size();
-		}
-		return average;
+		this.deviceId = deviceId;
+		this.status = status;
+		this.average = average;
+	}
+
+	public String getDeviceId() {
+		return deviceId;
 	}
 	
-	public String computeStatus(double average)
-	{
-		String result = "green";
-		if (average > 30.0)
-		{
-			result = "red";
-		}
-		else if (average < 10.0)
-		{
-			result = "yellow";
-		}
-		return result;
-	}
-
 }
