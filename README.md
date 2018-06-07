@@ -32,7 +32,7 @@ Spring boot starter project for the Azure IoT Hub.  Any applications wanting to 
 and/or common components just need to include this starter as a maven POM dependency.
 
 # Azure IoT Hub setup
-You'll need an Azure account, and an IoT Hub to use. Follow the directions [here]( https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-send-telemetry-java) up to but not including the first sample application to create a device identity.  As you go along, be sure to capture:
+You'll need an Azure account, and an IoT Hub to use. The free tier works fine for this demo.  Follow the directions [here]( https://docs.microsoft.com/en-us/azure/iot-hub/quickstart-send-telemetry-java) up to but not including the first sample application to create a device identity.  As you go along, be sure to capture:
 * IoT Hub Name
 * Device ID
 * IoT Hub Hostname
@@ -260,6 +260,19 @@ stream deploy --name iot-stream --properties "deployer.azure-iot-hub.memory=2g,d
 stream list
 ```
 
+# View the apps in PCF
+Use the "cf apps" command to view the apps in PCF.  There should be 3 apps displayed for this demo, the data-flow-server, the azure-iot-hub, and
+the azure-iot-output apps.  Note the SCDF component app names are geneerated by SCDF, and start with the name of the data-flow-server app, plus
+a random word (ex. k1ur8ZH) to make each app name unique.
+
+```
+cf apps
+name                                                   requested state   instances   memory   disk   urls
+data-flow-server                                       started           1/1         2G       2G     data-flow-server-mj.cfapps.io
+data-flow-server-k1ur8ZH-iot-stream-azure-iot-hub      started           1/1         2G       1G     data-flow-server-k1ur8ZH-iot-stream-azure-iot-hub.cfapps.io
+data-flow-server-k1ur8ZH-iot-stream-azure-iot-output   started           1/1         2G       1G     data-flow-server-k1ur8ZH-iot-stream-azure-iot-output.cfapps.io
+```
+
 # Validate that the azure-iot-output app was bound to Redis
 The deploy command above should deploy the azure-iot-output app, and bind it to the Redis service instance we created earlier.  You can run the "cf services"
  command to see if the azure-iot-output app is listed as a bound app for the redis service:
@@ -308,6 +321,6 @@ applications:
     SHARED_ACCESS_KEY: 2kX/eAIsbhPFzsCVzs8FuSm2/Ajute85uTa4Fkt1H5I=
 ```
 
-Once the device app is deployed, note the URL from the output, and load the app into your browser.  Click the "Start" button to start sending data to the Azure IoT Hub, and "Stop" to pause the data.  You can use the "+" and "-" buttons to adjust the wind speed, then wait around 30 seconds for the background color to change (at 10 and 30 mph).
+Once the device app is deployed, note the URL from the output, and load the app into your browser.  Click the "Start" button to start sending data to the Azure IoT Hub, and "Stop" to pause the data.  You can use the "+" and "-" buttons to adjust the wind speed, then wait around 30 seconds for the background color to change (at 10 and 30 mph).  Use the "Reset" button to clear the list of values from the Redis cache.
 
 Use "cf apps" to get the name of the apps deployed to PCF by SCDF, and use "cf logs" to see the messages processed by each component application.

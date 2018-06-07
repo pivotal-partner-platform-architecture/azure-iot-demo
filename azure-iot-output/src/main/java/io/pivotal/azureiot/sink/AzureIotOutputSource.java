@@ -59,6 +59,9 @@ public class AzureIotOutputSource extends AbstractCloudConfig {
 	@Autowired
 	private StringRedisTemplate template;
 	
+	@Autowired
+	private Calculator calculator;
+	
 	@PostConstruct
 	public void startup() {
 		System.out.println("startup");
@@ -122,12 +125,7 @@ public class AzureIotOutputSource extends AbstractCloudConfig {
 		
 		List<String> speeds = listOps.range(0, -1);
 		
-		double sum = 0.0;
-		for (String speed : speeds)
-		{
-			sum += Double.valueOf(speed);
-		}
-		double average = sum / speeds.size();
+		double average = calculator.average(speeds);
 		System.out.println("average: " + formatter.format(average) + " for " + speeds.size() + " values");
 		
 		BoundHashOperations<String, String, String> hashOps = template.boundHashOps(deviceKey);
