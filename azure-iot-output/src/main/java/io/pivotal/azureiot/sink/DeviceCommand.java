@@ -18,11 +18,7 @@ package io.pivotal.azureiot.sink;
 public class DeviceCommand 
 {
 	private String deviceId;
-	
-	@SuppressWarnings("unused")
-	private String status;
-	
-	@SuppressWarnings("unused")
+	private String status;	
 	private double average;
 	
 	public DeviceCommand(String deviceId, String status, double average)
@@ -36,4 +32,12 @@ public class DeviceCommand
 		return deviceId;
 	}
 	
+	public String getStatus() {
+		return status;
+	}
+
+	public double getAverage() {
+		return average;
+	}
+
 }

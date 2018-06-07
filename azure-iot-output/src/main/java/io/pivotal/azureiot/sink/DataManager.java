@@ -20,16 +20,13 @@ import java.util.List;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.config.java.AbstractCloudConfig;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.BoundListOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DataManager extends AbstractCloudConfig
+public class DataManager 
 {
 
 	@Autowired
@@ -101,9 +98,4 @@ public class DataManager extends AbstractCloudConfig
 		return result;
 	}
 
-	@Bean
-	public RedisConnectionFactory redisFactory() {
-	    return connectionFactory().redisConnectionFactory();
-	}
-	
 }

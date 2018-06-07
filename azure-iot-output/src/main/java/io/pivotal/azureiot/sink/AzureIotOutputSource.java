@@ -23,9 +23,12 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.cloudfoundry.com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.cloud.config.java.AbstractCloudConfig;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.microsoft.azure.iot.service.sdk.DeliveryAcknowledgement;
 import com.microsoft.azure.iot.service.sdk.FeedbackBatch;
@@ -36,7 +39,7 @@ import com.microsoft.azure.iot.service.sdk.ServiceClient;
 
 @EnableBinding(Sink.class)
 @EnableConfigurationProperties({ AzureIotOutputSourceProperties.class })
-public class AzureIotOutputSource 
+public class AzureIotOutputSource extends AbstractCloudConfig
 {
 
 	private static final IotHubServiceClientProtocol protocol = IotHubServiceClientProtocol.AMQPS;
@@ -126,6 +129,11 @@ public class AzureIotOutputSource
 			System.err.println("Error sending command to device");
 			e.printStackTrace();
 		}
+	}
+	
+	@Bean
+	public RedisConnectionFactory redisFactory() {
+	    return connectionFactory().redisConnectionFactory();
 	}
 	
 }
