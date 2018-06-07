@@ -61,6 +61,8 @@ public class Device {
 	private 	DeviceClient client;
 
 	private DeviceStatus status = new DeviceStatus();
+	
+	private String dataPointType = "update";
 
 	@PostConstruct
 	public void startup() throws IOException, URISyntaxException {
@@ -73,7 +75,7 @@ public class Device {
 
 		Object context = null;
 		client.setMessageCallback(receiver, context);
-
+		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
@@ -127,11 +129,20 @@ public class Device {
 		return result;
 	}
 
+	public void reset() {
+		System.out.println("reset called");
+		dataPointType = "clear";
+	}
+
 	private class TelemetryDataPoint {
 		@SuppressWarnings("unused")
 		public String deviceId;
+		
 		@SuppressWarnings("unused")
 		public double windSpeed;
+
+		@SuppressWarnings("unused")
+		public String type;
 
 		public String serialize() {
 			Gson gson = new Gson();
@@ -158,6 +169,7 @@ public class Device {
 						TelemetryDataPoint telemetryDataPoint = new TelemetryDataPoint();
 						telemetryDataPoint.deviceId = properties.getDeviceId();
 						telemetryDataPoint.windSpeed = status.getCurrent();
+						telemetryDataPoint.type = dataPointType;
 
 						String msgStr = telemetryDataPoint.serialize();
 						Message msg = new Message(msgStr);
@@ -169,6 +181,7 @@ public class Device {
 						synchronized (lockobj) {
 							lockobj.wait();
 						}
+						dataPointType = "update";
 					}
 					Thread.sleep(5000);
 					System.out.println("after sleep");
@@ -247,4 +260,5 @@ public class Device {
 			this.current = current;
 		}
 	}
+
 }

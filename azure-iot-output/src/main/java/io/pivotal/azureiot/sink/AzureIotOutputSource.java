@@ -99,11 +99,19 @@ public class AzureIotOutputSource extends AbstractCloudConfig {
 		JSONObject obj = new JSONObject(data);
 		String deviceId = obj.getString("deviceId");
 		double windSpeed = obj.getDouble("windSpeed");
+		String messageType = obj.getString("type");
 		
 		String listKey = "List:" + deviceId;
 		String deviceKey = "Device:" + deviceId;
 		
 		BoundListOperations<String, String> listOps = template.boundListOps(listKey);
+		if ("clear".equals(messageType))
+		{
+			System.out.println("Clearing list of values");
+			listOps.trim(0, 0);
+			listOps.rightPop();
+		}
+		
 		long listSize = listOps.size();
 		if (listSize >= 10)
 		{
@@ -123,8 +131,14 @@ public class AzureIotOutputSource extends AbstractCloudConfig {
 		System.out.println("average: " + formatter.format(average) + " for " + speeds.size() + " values");
 		
 		BoundHashOperations<String, String, String> hashOps = template.boundHashOps(deviceKey);
-		
 		String oldStatus = hashOps.get("status");
+		
+		if ("clear".equals(messageType))
+		{
+			System.out.println("Clearing status");
+			oldStatus = null;
+		}
+
 		String newStatus = computeStatus(average);
 		if (! newStatus.equals(oldStatus))
 		{

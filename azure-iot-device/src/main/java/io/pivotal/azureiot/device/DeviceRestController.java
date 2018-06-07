@@ -58,4 +58,10 @@ public class DeviceRestController {
 	{
 		return device.status();
 	}
+	
+	@RequestMapping("/reset")
+	public void reset() 
+	{
+		device.reset();
+	}
 }
