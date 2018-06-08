@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataManager 
 {
-
 	@Autowired
 	private StringRedisTemplate template;
 	
@@ -37,6 +36,12 @@ public class DataManager
 
 	private DecimalFormat formatter = new DecimalFormat("#0.00");
 
+	public DataManager(StringRedisTemplate template, Calculator calculator)
+	{
+		this.template = template;
+		this.calculator = calculator;
+	}
+	
 	/**
 	 * Save the data in redis.
 	 * @param data Data to save
@@ -55,6 +60,7 @@ public class DataManager
 		String deviceKey = "Device:" + deviceId;
 		
 		BoundListOperations<String, String> listOps = template.boundListOps(listKey);
+		
 		if ("clear".equals(messageType))
 		{
 			System.out.println("Clearing list of values");
